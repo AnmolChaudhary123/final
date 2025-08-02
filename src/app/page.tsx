@@ -6,6 +6,9 @@ import { Blog } from '@/models';
 import { ArrowRight, TrendingUp, BookOpen, Users, Plus } from 'lucide-react';
 import BlogCard from '@/components/BlogCard';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 interface BlogData {
   _id: string;
   title: string;
@@ -200,7 +203,36 @@ export default async function HomePage() {
                 <BlogCard 
                   key={blog._id} 
                   blog={blog}
-                  excerptLength={120}
+                  excerptLength={80}
+                  showReadMore={true}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Latest Blogs */}
+        {safeLatestBlogs.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold">Latest Stories</h2>
+                <p className="text-muted-foreground">Fresh content from our community of writers</p>
+              </div>
+              <Link
+                href="/blog"
+                className="btn btn-ghost group"
+              >
+                View All 
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {safeLatestBlogs.map((blog) => (
+                <BlogCard 
+                  key={blog._id} 
+                  blog={blog}
+                  excerptLength={100}
                   showReadMore={true}
                 />
               ))}
@@ -211,62 +243,64 @@ export default async function HomePage() {
         {/* Categories */}
         {categories.length > 0 && (
           <section>
-            <h2 className="text-3xl font-bold mb-8">Popular Categories</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold">Explore Categories</h2>
+              <p className="text-muted-foreground">Find content that interests you</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {categories.map((category) => (
                 <Link
                   key={category._id}
                   href={`/blog?category=${category._id}`}
-                  className="card p-6 text-center hover-lift"
+                  className="card p-6 hover-lift group"
                 >
-                  <h3 className="font-semibold mb-2">
+                  <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
                     {category._id}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {category.count} posts
+                  <p className="text-muted-foreground">
+                    {category.count} {category.count === 1 ? 'post' : 'posts'}
                   </p>
                 </Link>
               ))}
             </div>
           </section>
         )}
-
-        {/* Latest Blogs */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold">Latest Posts</h2>
-              <p className="text-muted-foreground">Stay updated with fresh content from our community</p>
-            </div>
-            <Link
-              href="/blog"
-              className="btn btn-ghost group"
-            >
-              View All 
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {safeLatestBlogs.map((blog) => (
-              <BlogCard 
-                key={blog._id} 
-                blog={blog}
-                excerptLength={100}
-                showReadMore={true}
-              />
-            ))}
-          </div>
-        </section>
       </div>
     );
   } catch (error) {
     console.error('Error in HomePage:', error);
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
-          <p className="text-muted-foreground">Please try refreshing the page</p>
-        </div>
+      <div className="space-y-16">
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-8 md:p-12">
+          <div className="absolute inset-0 bg-grid-white/[0.2] bg-[size:60px_60px]" />
+          <div className="relative mx-auto max-w-4xl text-center">
+            <h1 className="text-4xl font-bold tracking-tight text-primary-foreground md:text-6xl lg:text-7xl">
+              Share Your{' '}
+              <span className="bg-gradient-to-r from-primary-foreground to-primary-foreground/80 bg-clip-text text-transparent">
+                Stories
+              </span>
+            </h1>
+            <p className="mt-6 text-lg text-primary-foreground/90 md:text-xl">
+              A modern blog platform for writers, creators, and storytellers. 
+              Connect with readers and share your unique perspective with the world.
+            </p>
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+              <Link
+                href="/blog"
+                className="btn btn-primary btn-lg group bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              >
+                Explore Blogs
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="btn btn-primary btn-lg group bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              >
+                Start Writing
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }

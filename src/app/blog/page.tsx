@@ -1,8 +1,9 @@
 import { Blog } from '@/models';
-import { Search } from 'lucide-react';
-import Link from 'next/link';
 import SearchFilters from '@/components/SearchFilters';
 import BlogCard from '@/components/BlogCard';
+
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
 
 interface SearchParams {
   page?: string;
@@ -36,13 +37,11 @@ interface CategoryData {
   count: number;
 }
 
-// Safe data serialization function
 function safeSerializeBlog(blog: Record<string, unknown>): BlogData | null {
   try {
-    // Convert _id to string properly
     const id = blog._id;
-    const stringId = typeof id === 'object' && id !== null && '_bsontype' in id 
-      ? (id as any).toString() 
+    const stringId = typeof id === 'object' && id !== null && '_bsontype' in id
+      ? (id as any).toString()
       : String(id || '');
 
     return {
@@ -55,7 +54,7 @@ function safeSerializeBlog(blog: Record<string, unknown>): BlogData | null {
       category: (blog.category as string) || '',
       views: (blog.views as number) || 0,
       readTime: (blog.readTime as number) || 1,
-      publishedAt: blog.publishedAt as Date || blog.createdAt as Date,
+      publishedAt: blog.publishedAt as Date,
       createdAt: blog.createdAt as Date,
       author: blog.author ? {
         name: (blog.author as { name: string }).name || 'Unknown'
@@ -180,7 +179,9 @@ export default async function BlogPage({
         ) : (
           <div className="text-center py-12">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-              <Search className="h-8 w-8 text-muted-foreground" />
+              <svg className="h-8 w-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
             <h3 className="text-lg font-semibold mb-2">No posts found</h3>
             <p className="text-muted-foreground">
@@ -191,28 +192,22 @@ export default async function BlogPage({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-8">
-            {page > 1 && (
-              <Link
-                href={`/blog?page=${page - 1}&search=${search}&category=${category}&sort=${sort}`}
-                className="btn btn-outline"
-              >
-                Previous
-              </Link>
-            )}
-            
-            <span className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
-            </span>
-            
-            {page < totalPages && (
-              <Link
-                href={`/blog?page=${page + 1}&search=${search}&category=${category}&sort=${sort}`}
-                className="btn btn-outline"
-              >
-                Next
-              </Link>
-            )}
+          <div className="mt-8 flex justify-center">
+            <nav className="flex items-center gap-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <a
+                  key={pageNum}
+                  href={`/blog?page=${pageNum}`}
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    pageNum === page
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {pageNum}
+                </a>
+              ))}
+            </nav>
           </div>
         )}
       </div>
@@ -220,10 +215,12 @@ export default async function BlogPage({
   } catch (error) {
     console.error('Error in BlogPage:', error);
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
-          <p className="text-muted-foreground">Please try refreshing the page</p>
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold mb-4">Error Loading Blog</h1>
+          <p className="text-muted-foreground">
+            Something went wrong while loading the blog posts.
+          </p>
         </div>
       </div>
     );
