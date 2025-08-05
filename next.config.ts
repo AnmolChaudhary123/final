@@ -88,6 +88,11 @@ const nextConfig: NextConfig = {
        port:"",
        partname:"/**",
       },
+      { protocol:" https",
+      hostname:"wikihow.com",
+       port:"",
+       partname:"/**",
+      },
     ],
   },
 };
