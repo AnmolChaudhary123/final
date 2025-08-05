@@ -26,7 +26,61 @@ const nextConfig: NextConfig = {
         hostname: 'www.bing.com',
         port: '',
         pathname: '/**',
+      },{
+        protocol: "https",
+        hostname: "dribbble.com",
+        port: "",
+        pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "imgs.search.brave.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "wqq.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "imgs.search.google.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "example.com",
+        port: "",
+        pathname:"/**",
+      },
+      {
+        protocol: "https", 
+        hostname: "another-domain.com", 
+        port:"",
+        pathname: "/**"
+      },
+      {
+        protocol: "https", 
+        hostname: "media.gettyimages.com", 
+        port:"",
+        pathname: "/**"
+      },
+      {
+        protocol: "https",
+        hostname: "www.shutterstock.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname:"encrypted-tbn0.gstatic.com",
+        port:"",  
+        pathname:"/**",
+      },
+      
     ],
   },
 };
