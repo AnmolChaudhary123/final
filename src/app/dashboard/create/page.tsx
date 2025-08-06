@@ -220,7 +220,7 @@ export default function CreateBlogPage() {
         </div>
 
         {/* Status and Featured */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+{/*         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium mb-2">
               Status
@@ -233,7 +233,30 @@ export default function CreateBlogPage() {
               <option value="draft">Draft</option>
               <option value="published">Published</option>
             </select>
-          </div>
+          </div> */}
+
+ {/* Submit Button */}
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="btn btn-primary"
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Creating...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-8" />
+                Published
+              </>
+            )}
+          </button>
+
+
+          
 
           <div className="flex items-center space-x-2">
             <input
