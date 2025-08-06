@@ -60,7 +60,7 @@ export default async function DashboardPage() {
       readTime: blog.readTime || 1,
       publishedAt: blog.publishedAt || blog.createdAt,
       createdAt: blog.createdAt,
-      status: blog.status || 'draft',
+      status: blog.status || 'published',
       isFeatured: blog.isFeatured || false,
       author: blog.author ? {
         name: blog.author.name || 'Unknown'
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
   });
 
   const publishedCount = safeBlogs.filter(blog => blog.status === 'published').length;
-  const draftCount = safeBlogs.filter(blog => blog.status === 'draft').length;
+  // const draftCount = safeBlogs.filter(blog => blog.status === 'draft').length;
   const totalViews = safeBlogs.reduce((sum, blog) => sum + blog.views, 0);
 
   return (
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{publishedCount} published</span>
             <span>•</span>
-            <span>{draftCount} drafts</span>
+{/*             <span>{draftCount} drafts</span> */}
           </div>
         </div>
 
