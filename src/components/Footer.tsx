@@ -104,7 +104,7 @@ export default function Footer() {
             <div className="space-y-2 text-sm text-gray-300">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>hello@bloghub.com</span>
+                <span>bloghub123@gmail.com</span>
               </div>
               <p>Have questions or suggestions?</p>
               <p>We&apos;d love to hear from you!</p>
@@ -123,13 +123,13 @@ export default function Footer() {
               <span>for creators</span>
             </div>
             <div className="flex space-x-6 text-sm text-gray-300">
-              <Link href="#" className="hover:text-white transition-colors">
+              <Link href="privacy" className="hover:text-white transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="#" className="hover:text-white transition-colors">
+              <Link href="termservice" className="hover:text-white transition-colors">
                 Terms of Service
               </Link>
-              <Link href="#" className="hover:text-white transition-colors">
+              <Link href="cookie-policy" className="hover:text-white transition-colors">
                 Cookie Policy
               </Link>
             </div>
