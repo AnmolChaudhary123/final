@@ -16,20 +16,17 @@ export default function Footer() {
               Share your unique perspective with the world.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="https://x.com/" className="text-gray-400 hover:text-white transition-colors">
                 <Twitter className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="https://www.facebook.com/" className="text-gray-400 hover:text-white transition-colors">
                 <Facebook className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="https://www.instagram.com/" className="text-gray-400 hover:text-white transition-colors">
                 <Instagram className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="https://github.com/AnmolChaudhary123" className="text-gray-400 hover:text-white transition-colors">
                 <Github className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Linkedin className="h-5 w-5" />
               </Link>
             </div>
           </div>
@@ -123,13 +120,13 @@ export default function Footer() {
               <span>for creators</span>
             </div>
             <div className="flex space-x-6 text-sm text-gray-300">
-              <Link href="privacy" className="hover:text-white transition-colors">
+              <Link href="/privacy" className="hover:text-white transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="termservice" className="hover:text-white transition-colors">
+              <Link href="/termservice" className="hover:text-white transition-colors">
                 Terms of Service
               </Link>
-              <Link href="cookie-policy" className="hover:text-white transition-colors">
+              <Link href="/cookie-policy" className="hover:text-white transition-colors">
                 Cookie Policy
               </Link>
             </div>
