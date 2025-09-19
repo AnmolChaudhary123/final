@@ -38,7 +38,7 @@ export async function PUT(
   { params }: { params: Promise<{ blogId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions) as { user: { id: string } } | null;
+    const session = await getServerSession(authOptions) as { user: { id: string; role: 'admin' | 'user' } } | null;
     if (!session) {
       return NextResponse.json(
         { message: 'Unauthorized' },
@@ -136,7 +136,7 @@ export async function DELETE(
   { params }: { params: Promise<{ blogId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions) as { user: { id: string } } | null;
+    const session = await getServerSession(authOptions) as { user: { id: string; role: 'admin' | 'user' } } | null;
     if (!session) {
       return NextResponse.json(
         { message: 'Unauthorized' },
@@ -156,7 +156,8 @@ export async function DELETE(
       );
     }
 
-    if (existingBlog.author.toString() !== session.user.id) {
+    // Allow deletion if user is the author or an admin
+    if (existingBlog.author.toString() !== session.user.id && session.user.role !== 'admin') {
       return NextResponse.json(
         { message: 'You are not authorized to delete this post' },
         { status: 403 }

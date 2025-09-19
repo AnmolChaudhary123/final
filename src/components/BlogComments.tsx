@@ -12,7 +12,7 @@ interface Comment {
     _id: string;
     name: string;
     image?: string;
-  };
+  } | null;
   createdAt: string;
   likes: string[];
   replies: Comment[];
@@ -34,7 +34,11 @@ export default function BlogComments({ blogId }: BlogCommentsProps) {
       const response = await fetch(`/api/blogs/${blogId}/comments`);
       if (response.ok) {
         const data = await response.json();
-        setComments(data);
+        // Filter out comments with null authors to prevent rendering errors
+        const validComments = data.filter((comment: Comment) => comment.author !== null);
+        setComments(validComments);
+      } else {
+        console.error('Failed to fetch comments:', response.status);
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -174,11 +178,11 @@ export default function BlogComments({ blogId }: BlogCommentsProps) {
           comments.map((comment) => (
             <div key={comment._id} className="flex gap-4">
               <div className="flex-shrink-0">
-                {comment.author.image ? (
+                {comment.author?.image ? (
                   <div className="relative w-10 h-10">
                     <Image
                       src={comment.author.image}
-                      alt={comment.author.name}
+                      alt={comment.author.name || 'User'}
                       fill
                       className="rounded-full object-cover"
                       sizes="40px"
@@ -193,7 +197,7 @@ export default function BlogComments({ blogId }: BlogCommentsProps) {
               <div className="flex-1">
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm">{comment.author.name}</span>
+                    <span className="font-medium text-sm">{comment.author?.name || 'Unknown User'}</span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(comment.createdAt).toLocaleDateString()}
                     </span>

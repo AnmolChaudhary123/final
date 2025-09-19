@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Save, ArrowLeft } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditor';
+import ImageUpload from '@/components/ImageUpload';
 
 interface BlogFormData {
   title: string;
@@ -22,7 +22,7 @@ interface BlogFormData {
 export default function CreateBlogPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<BlogFormData>({
     title: '',
@@ -69,7 +69,11 @@ export default function CreateBlogPage() {
 
       if (response.ok) {
         const data = await response.json();
-        router.push(`/blog/${data.slug}`);
+        if (formData.status === 'published') {
+          router.push(`/blog/${data.slug}`);
+        } else {
+          router.push('/dashboard');
+        }
       } else {
         const error = await response.json();
         alert(error.message || 'Something went wrong');
@@ -99,9 +103,21 @@ export default function CreateBlogPage() {
             Back to Dashboard
           </Link>
         </div>
-        <h1 className="text-3xl font-bold">Create New Post</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Create New Post</h1>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${formData.status === 'published' ? 'bg-green-500' : 'bg-yellow-500'
+              }`}></div>
+            <span className="text-sm font-medium capitalize text-muted-foreground">
+              {formData.status}
+            </span>
+          </div>
+        </div>
         <p className="text-muted-foreground mt-2">
-          Share your thoughts and ideas with the world
+          {formData.status === 'draft'
+            ? 'Save your work as a draft to continue later'
+            : 'Share your thoughts and ideas with the world'
+          }
         </p>
       </div>
 
@@ -187,40 +203,18 @@ export default function CreateBlogPage() {
         {/* Featured Image URL */}
         <div>
           <label className="block text-sm font-medium mb-2">
-            Featured Image URL
+            Featured Image
           </label>
-          <div className="space-y-4">
-            <input
-              type="url"
-              value={formData.featuredImage}
-              onChange={(e) => handleChange('featuredImage', e.target.value)}
-              className="input"
-              placeholder="https://example.com/image.jpg"
-            />
-            {formData.featuredImage && (
-              <div className="flex items-center gap-4">
-                <div className="relative w-20 h-20">
-                  <Image
-                    src={formData.featuredImage}
-                    alt="Featured"
-                    fill
-                    className="object-cover rounded-lg border"
-                    sizes="80px"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  Preview of featured image
-                </span>
-              </div>
-            )}
-          </div>
+          <ImageUpload
+            value={formData.featuredImage}
+            onChange={(url) => handleChange('featuredImage', url)}
+            placeholder="Upload featured image for your blog post"
+            maxSize={20}
+          />
         </div>
 
         {/* Status and Featured */}
-{/*         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium mb-2">
               Status
@@ -233,65 +227,89 @@ export default function CreateBlogPage() {
               <option value="draft">Draft</option>
               <option value="published">Published</option>
             </select>
-          </div> */}
-
- {/* Submit Button */}
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="btn btn-primary"
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Creating...
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-8" />
-                Published
-              </>
-            )}
-          </button>
-
-
-          
-
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="isFeatured"
-              checked={formData.isFeatured}
-              onChange={(e) => handleChange('isFeatured', e.target.checked)}
-              className="rounded border-gray-300"
-            />
-            <label htmlFor="isFeatured" className="text-sm font-medium">
-              Mark as Featured
+            <p className="text-xs text-muted-foreground mt-1">
+              {formData.status === 'draft'
+                ? 'Draft posts are saved but not visible to the public'
+                : 'Published posts are visible to all visitors'
+              }
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Featured Post
             </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                checked={formData.isFeatured}
+                onChange={(e) => handleChange('isFeatured', e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <label htmlFor="isFeatured" className="text-sm font-medium">
+                Mark as Featured
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Featured posts appear prominently on the homepage
+            </p>
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex gap-4">
+        {/* Submit Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4">
           <button
             type="submit"
             disabled={isLoading}
-            className="btn btn-primary"
+            className={`btn flex-1 ${formData.status === 'published'
+              ? 'btn-primary'
+              : 'btn-outline'
+              }`}
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Creating...
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                {formData.status === 'published' ? 'Publishing...' : 'Saving...'}
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Create Post
+                {formData.status === 'published' ? 'Publish Post' : 'Save as Draft'}
               </>
             )}
           </button>
-          
+
+          <button
+            type="button"
+            onClick={() => {
+              const newStatus = formData.status === 'draft' ? 'published' : 'draft';
+              handleChange('status', newStatus);
+            }}
+            disabled={isLoading}
+            className="btn btn-outline flex-1"
+          >
+            {formData.status === 'draft' ? 'Switch to Publish' : 'Switch to Draft'}
+          </button>
+        </div>
+
+        {/* Status Indicator */}
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${formData.status === 'published' ? 'bg-green-500' : 'bg-yellow-500'
+              }`}></div>
+            <span className="text-muted-foreground">
+              Status: <span className="font-medium capitalize">{formData.status}</span>
+            </span>
+          </div>
+          {formData.isFeatured && (
+            <span className="text-blue-600 dark:text-blue-400 font-medium">
+              ⭐ Featured Post
+            </span>
+          )}
+        </div>
+
+        {/* Cancel Button */}
+        <div className="flex justify-end">
           <Link href="/dashboard" className="btn btn-outline">
             Cancel
           </Link>
@@ -299,7 +317,7 @@ export default function CreateBlogPage() {
       </form>
     </div>
   );
-} 
+}
 
 
 

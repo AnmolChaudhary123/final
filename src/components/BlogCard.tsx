@@ -17,6 +17,7 @@ interface Blog {
   readTime: number;
   publishedAt?: Date;
   createdAt: Date;
+  likes?: string[];
   author?: {
     name: string;
   };
@@ -31,8 +32,8 @@ interface BlogCardProps {
 
 export default function BlogCard({ blog, excerptLength = 120, showReadMore = false }: BlogCardProps) {
   const [imageSrc, setImageSrc] = useState(getSafeImageUrl(blog.featuredImage));
-  const excerpt = blog.excerpt.length > excerptLength 
-    ? blog.excerpt.substring(0, excerptLength) + '...' 
+  const excerpt = blog.excerpt.length > excerptLength
+    ? blog.excerpt.substring(0, excerptLength) + '...'
     : blog.excerpt;
 
   // Update image after hydration to avoid mismatch
@@ -94,10 +95,14 @@ export default function BlogCard({ blog, excerptLength = 120, showReadMore = fal
               </div>
               <div className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />
-                <span>{blog.views} views</span>
+                <span>{blog.views}</span>
               </div>
             </div>
-            <time dateTime={blog.publishedAt?.toISOString() || blog.createdAt.toISOString()}>
+            <time dateTime={
+              blog.publishedAt
+                ? (blog.publishedAt instanceof Date ? blog.publishedAt.toISOString() : new Date(blog.publishedAt).toISOString())
+                : (blog.createdAt instanceof Date ? blog.createdAt.toISOString() : new Date(blog.createdAt).toISOString())
+            }>
               {formatDate(blog.publishedAt || blog.createdAt)}
             </time>
           </div>

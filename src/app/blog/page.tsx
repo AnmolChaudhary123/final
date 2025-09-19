@@ -30,6 +30,7 @@ interface BlogData {
     name: string;
   };
   isFeatured?: boolean;
+  likes?: string[]; 
 }
 
 interface CategoryData {
@@ -37,30 +38,36 @@ interface CategoryData {
   count: number;
 }
 
-function safeSerializeBlog(blog: Record<string, unknown>): BlogData | null {
+function safeSerializeBlog(blog: any): BlogData | null {
   try {
-    const id = blog._id;
-    const stringId = typeof id === 'object' && id !== null && '_bsontype' in id
-      ? (id as any).toString()
-      : String(id || '');
-
-    return {
-      _id: stringId,
-      title: (blog.title as string) || '',
-      slug: (blog.slug as string) || '',
-      content: (blog.content as string) || '',
-      excerpt: (blog.excerpt as string) || '',
-      featuredImage: (blog.featuredImage as string) || '',
-      category: (blog.category as string) || '',
-      views: (blog.views as number) || 0,
-      readTime: (blog.readTime as number) || 1,
-      publishedAt: blog.publishedAt as Date,
-      createdAt: blog.createdAt as Date,
-      author: blog.author ? {
-        name: (blog.author as { name: string }).name || 'Unknown'
-      } : undefined,
-      isFeatured: (blog.isFeatured as boolean) || false
+    // Create a simple object with only the properties we need
+    const result: any = {
+      _id: blog._id?.toString() || '',
+      title: blog.title || '',
+      slug: blog.slug || '',
+      content: blog.content || '',
+      excerpt: blog.excerpt || '',
+      featuredImage: blog.featuredImage || '',
+      category: blog.category || '',
+      views: blog.views || 0,
+      readTime: blog.readTime || 1,
+      publishedAt: blog.publishedAt ? new Date(blog.publishedAt) : undefined,
+      createdAt: blog.createdAt ? new Date(blog.createdAt) : new Date(),
+      isFeatured: Boolean(blog.isFeatured),
+      likes: Array.isArray(blog.likes) 
+        ? blog.likes.map((id: any) => id?.toString?.() || '') 
+        : []
     };
+
+    // Handle author separately to avoid circular references
+    if (blog.author) {
+      result.author = {
+        name: blog.author.name || 'Unknown'
+      };
+    }
+
+    // Convert to JSON and back to remove any circular references
+    return JSON.parse(JSON.stringify(result));
   } catch (error) {
     console.error('Error serializing blog:', error);
     return null;
@@ -119,12 +126,19 @@ export default async function BlogPage({
     let categories: CategoryData[] = [];
 
     try {
+      // Explicitly select only the fields we need
       blogs = await Blog.find(query)
-        .populate('author', 'name')
+        .select('_id title slug content excerpt featuredImage category views readTime publishedAt createdAt isFeatured likes')
+        .populate({
+          path: 'author',
+          select: 'name',
+          options: { lean: true }  // Ensure author is a plain object
+        })
         .sort(sortQuery)
         .skip(skip)
         .limit(limit)
-        .lean(); // Use lean() to get plain objects
+        .lean() // Convert to plain JavaScript objects
+        .exec();
 
       total = await Blog.countDocuments(query);
       totalPages = Math.ceil(total / limit);

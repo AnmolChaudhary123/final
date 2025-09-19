@@ -1,10 +1,34 @@
-import NextAuth from 'next-auth';
+import NextAuth, { DefaultSession, User as NextAuthUser, AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import { User } from '@/models';
+import { User as UserModel } from '@/models';
 import connectDB from './mongodb';
 
-export const authOptions = {
+declare module 'next-auth' {
+  interface Session extends DefaultSession {
+    user: {
+      id: string;
+      role: 'admin' | 'user';
+    } & DefaultSession['user'];
+  }
+
+  interface User {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role: 'admin' | 'user';
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id: string;
+    role: 'admin' | 'user';
+  }
+}
+
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -19,7 +43,7 @@ export const authOptions = {
 
         try {
           await connectDB();
-          const user = await User.findOne({ email: credentials.email });
+          const user = await UserModel.findOne({ email: credentials.email });
 
           if (!user || !user.password) {
             return null;
@@ -31,12 +55,14 @@ export const authOptions = {
             return null;
           }
 
+          // Convert Mongoose document to a plain object and extract only the needed fields
+          const userObject = user.toObject ? user.toObject() : user;
           return {
-            id: user._id.toString(),
-            email: user.email,
-            name: user.name,
-            image: user.image,
-            role: user.role,
+            id: userObject._id?.toString() || userObject.id,
+            email: userObject.email,
+            name: userObject.name,
+            image: userObject.image,
+            role: userObject.role,
           };
         } catch (error) {
           console.error('Auth error:', error);
@@ -46,31 +72,32 @@ export const authOptions = {
     })
   ],
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }: { token: any; user: any }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
       }
       return session;
     }
   },
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup',
+    // Note: 'signUp' is not a standard page in NextAuth's PagesOptions
+    // You might want to handle signup in your signin page or use a custom page
   },
   debug: process.env.NODE_ENV === 'development',
-} as any;
+};
 
-const handler = (NextAuth as any)(authOptions);
-export { handler as GET, handler as POST }; 
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };

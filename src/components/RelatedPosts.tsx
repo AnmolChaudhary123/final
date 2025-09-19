@@ -104,7 +104,11 @@ function RelatedPostCard({ post }: { post: Blog }) {
                 <span>{post.views} views</span>
               </div>
             </div>
-            <time dateTime={post.publishedAt?.toISOString() || post.createdAt.toISOString()}>
+            <time dateTime={
+              post.publishedAt
+                ? (post.publishedAt instanceof Date ? post.publishedAt.toISOString() : new Date(post.publishedAt).toISOString())
+                : (post.createdAt instanceof Date ? post.createdAt.toISOString() : new Date(post.createdAt).toISOString())
+            }>
               {formatDate(post.publishedAt || post.createdAt)}
             </time>
           </div>

@@ -11,7 +11,7 @@ export interface IBlog extends Document {
   tags: string[];
   status: 'draft' | 'published';
   views: number;
-  likes: mongoose.Types.ObjectId[];
+  likes?: mongoose.Types.ObjectId[];
   readTime: number;
   isFeatured: boolean;
   publishedAt?: Date;
@@ -70,6 +70,7 @@ const BlogSchema = new Schema<IBlog>({
   likes: [{
     type: Schema.Types.ObjectId,
     ref: 'User',
+    default: [],
   }],
   readTime: {
     type: Number,

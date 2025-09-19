@@ -97,7 +97,11 @@ function BlogCard({ blog }: { blog: Blog }) {
                 <span>{blog.views} views</span>
               </div>
             </div>
-            <time dateTime={blog.publishedAt?.toISOString() || blog.createdAt.toISOString()}>
+            <time dateTime={
+              blog.publishedAt
+                ? (blog.publishedAt instanceof Date ? blog.publishedAt.toISOString() : new Date(blog.publishedAt).toISOString())
+                : (blog.createdAt instanceof Date ? blog.createdAt.toISOString() : new Date(blog.createdAt).toISOString())
+            }>
               {formatDate(blog.publishedAt || blog.createdAt)}
             </time>
           </div>

@@ -57,18 +57,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "example.com",
         port: "",
-        pathname:"/**",
+        pathname: "/**",
       },
       {
-        protocol: "https", 
-        hostname: "another-domain.com", 
-        port:"",
+        protocol: "https",
+        hostname: "another-domain.com",
+        port: "",
         pathname: "/**"
       },
       {
-        protocol: "https", 
-        hostname: "media.gettyimages.com", 
-        port:"",
+        protocol: "https",
+        hostname: "media.gettyimages.com",
+        port: "",
         pathname: "/**"
       },
       {
@@ -79,9 +79,9 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname:"encrypted-tbn0.gstatic.com",
-        port:"",  
-        pathname:"/**",
+        hostname: "encrypted-tbn0.gstatic.com",
+        port: "",
+        pathname: "/**",
       },
       {
         protocol: "https",
@@ -95,9 +95,15 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
 
 export default nextConfig;
-  
+
