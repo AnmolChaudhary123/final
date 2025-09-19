@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart, Mail, Twitter, Facebook, Instagram, Github, Linkedin } from 'lucide-react';
+import { Heart, Mail, Twitter, Facebook, Instagram, Github } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,7 +12,7 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-2xl font-bold text-white">BlogHub</h3>
             <p className="text-gray-300 text-sm leading-relaxed">
-              A modern platform for writers, creators, and storytellers. 
+              A modern platform for writers, creators, and storytellers.
               Share your unique perspective with the world.
             </p>
             <div className="flex space-x-4">

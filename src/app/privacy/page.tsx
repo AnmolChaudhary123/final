@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
         </div>
 
         <div>
-          <h2 className="text-2xl font-semibold mb-2 text-blue-600">5. Children's Privacy</h2>
+          <h2 className="text-2xl font-semibold mb-2 text-blue-600">5. Children&apos;s Privacy</h2>
           <p>
             Blog Hub is not intended for users under the age of 13. We do not knowingly collect data from children.
           </p>
@@ -72,7 +72,7 @@ export default function PrivacyPolicyPage() {
         <div>
           <h2 className="text-2xl font-semibold mb-2 text-blue-600">7. Updates to This Policy</h2>
           <p>
-            We may update this Privacy Policy occasionally. When we do, we'll update the date at the top and notify you if necessary.
+            We may update this Privacy Policy occasionally. When we do, we&apos;ll update the date at the top and notify you if necessary.
           </p>
         </div>
 

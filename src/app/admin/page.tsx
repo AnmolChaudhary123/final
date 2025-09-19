@@ -74,20 +74,20 @@ const ConfirmationDialog = ({
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   const [blogs, setBlogs] = useState<BlogData[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{id: string, name: string} | null>(null);
+  const [selectedUser, setSelectedUser] = useState<{ id: string, name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
-  const [editingUser, setEditingUser] = useState<{id: string, role: string} | null>(null);
+  const [editingUser, setEditingUser] = useState<{ id: string, role: string } | null>(null);
 
   // Check authentication and fetch data
   useEffect(() => {
     if (status === 'loading') return;
-    
+
     if (!session) {
       router.push('/auth/signin');
       return;
@@ -119,7 +119,7 @@ export default function AdminPage() {
   // Handle user deletion
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
-    
+
     try {
       setIsDeleting(true);
       const response = await fetch(`/api/users/${selectedUser.id}`, {
@@ -133,7 +133,7 @@ export default function AdminPage() {
 
       // Update the users list
       setUsers(prevUsers => prevUsers.filter(user => user._id !== selectedUser.id));
-      
+
       toast.success('User deleted successfully');
     } catch (error: any) {
       console.error('Error deleting user:', error);
@@ -150,7 +150,7 @@ export default function AdminPage() {
     try {
       setIsUpdatingRole(true);
       setEditingUser({ id: userId, role: newRole });
-      
+
       const response = await fetch(`/api/users/${userId}`, {
         method: 'PATCH',
         headers: {
@@ -165,12 +165,12 @@ export default function AdminPage() {
       }
 
       // Update the users list
-      setUsers(prevUsers => 
-        prevUsers.map(user => 
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
           user._id === userId ? { ...user, role: newRole } : user
         )
       );
-      
+
       toast.success('User role updated successfully');
     } catch (error: any) {
       console.error('Error updating user role:', error);
@@ -199,7 +199,7 @@ export default function AdminPage() {
 
       // Update the blogs list
       setBlogs(prevBlogs => prevBlogs.filter(blog => blog._id !== blogId));
-      
+
       toast.success('Blog post deleted successfully');
     } catch (error: any) {
       console.error('Error deleting blog post:', error);
@@ -221,7 +221,7 @@ export default function AdminPage() {
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'MMM d, yyyy');
-    } catch (error) {
+    } catch {
       return 'Invalid date';
     }
   };
@@ -297,7 +297,7 @@ export default function AdminPage() {
                         >
                           <Edit className="h-4 w-4" />
                         </Link>
-                        <button 
+                        <button
                           onClick={() => handleDeleteBlog(blog._id)}
                           className="btn btn-ghost btn-sm text-destructive hover:bg-red-50 rounded-full p-2"
                           title="Delete post"
@@ -380,9 +380,9 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
+          </div>
         </div>
       </div>
-    </div>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog

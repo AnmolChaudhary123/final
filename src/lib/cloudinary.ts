@@ -24,23 +24,8 @@ export interface CloudinaryDeleteResult {
  * Upload an image to Cloudinary
  */
 export async function uploadImage(
-    file: File,
-    folder: string = 'blog_images',
-    options: {
-        quality?: string | number;
-        width?: number;
-        height?: number;
-        crop?: string;
-        format?: string;
-    } = {}
+    file: File
 ): Promise<CloudinaryUploadResult> {
-    const {
-        quality = 'auto',
-        width = 1200,
-        height = 630,
-        crop = 'limit',
-        format = 'auto'
-    } = options;
 
     return new Promise((resolve, reject) => {
         const formData = new FormData();

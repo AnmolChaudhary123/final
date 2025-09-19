@@ -4,8 +4,7 @@ import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { Types } from 'mongoose';
-import type { NextRequest } from 'next/server';
-import type { DefaultSession, Session } from 'next-auth';
+// Removed unused types
 
 type RouteParams = {
   params: {
@@ -15,11 +14,11 @@ type RouteParams = {
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const session = await getServerSession<typeof authOptions>(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized: Please log in' },
@@ -28,7 +27,7 @@ export async function DELETE(
     }
 
     const user = session.user as { role: 'admin' | 'user' };
-    
+
     if (user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden: Admin access required' },
@@ -39,10 +38,11 @@ export async function DELETE(
     await connectDB();
 
     // Convert string ID to MongoDB ObjectId
-    const userId = new Types.ObjectId(params.userId);
+    const { userId: userIdParam } = await params;
+    const userId = new Types.ObjectId(userIdParam);
 
     // Prevent deleting own account
-    if (session.user.id === params.userId) {
+    if (session.user.id === userIdParam) {
       return NextResponse.json(
         { error: 'Cannot delete your own account' },
         { status: 400 }
@@ -64,7 +64,7 @@ export async function DELETE(
 
 export async function PATCH(
   req: Request,
-  { params }: RouteParams
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -89,7 +89,8 @@ export async function PATCH(
     const sessionUser = session.user as { id: string; role: 'admin' | 'user' };
 
     // Prevent changing own role
-    if (sessionUser.id === params.userId) {
+    const { userId } = await params;
+    if (sessionUser.id === userId) {
       return NextResponse.json(
         { error: 'Cannot change your own role' },
         { status: 400 }
@@ -99,11 +100,11 @@ export async function PATCH(
     await connectDB();
 
     const user = await User.findByIdAndUpdate(
-      params.userId,
+      userId,
       { role },
       { new: true }
     );
-    
+
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
