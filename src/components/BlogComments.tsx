@@ -186,11 +186,34 @@ export default function BlogComments({ blogId }: BlogCommentsProps) {
                       fill
                       className="rounded-full object-cover"
                       sizes="40px"
+                      onError={(e) => {
+                        // If image fails to load, show the default icon
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          const fallback = document.createElement('div');
+                          fallback.className = 'w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center';
+                          
+                          // Create a container for the React component
+                          const iconContainer = document.createElement('div');
+                          parent.appendChild(fallback);
+                          
+                          // Use React's createRoot to render the icon
+                          import('react-dom/client').then(({ createRoot }) => {
+                            const icon = <UserIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
+                            const root = createRoot(iconContainer);
+                            root.render(icon);
+                          });
+                          
+                          fallback.appendChild(iconContainer);
+                        }
+                      }}
                     />
                   </div>
                 ) : (
-                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                    <UserIcon className="h-5 w-5 text-gray-600" />
+                  <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                    <UserIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                   </div>
                 )}
               </div>
@@ -203,19 +226,6 @@ export default function BlogComments({ blogId }: BlogCommentsProps) {
                     </span>
                   </div>
                   <p className="text-sm">{comment.content}</p>
-                </div>
-                <div className="flex items-center gap-4 mt-2">
-                  <button
-                    onClick={() => handleLike(comment._id)}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <Heart className={`h-3 w-3 ${comment.likes.includes((session?.user as { id?: string })?.id || '') ? 'fill-red-500 text-red-500' : ''}`} />
-                    {comment.likes.length}
-                  </button>
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <MessageCircle className="h-3 w-3" />
-                    {comment.replies.length}
-                  </span>
                 </div>
               </div>
             </div>

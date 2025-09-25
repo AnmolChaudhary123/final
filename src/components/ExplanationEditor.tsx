@@ -18,13 +18,14 @@ import {
 } from 'lucide-react';
 import { Editor } from '@tiptap/core';
 
-interface RichTextEditorProps {
+interface ExplanationEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
 }
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
+    
   if (!editor) {
     return null;
   }
@@ -57,20 +58,15 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         type="button"
         onClick={() => editor.chain().focus().toggleItalic().run()}
         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}
+        title="Italic (Ctrl+I)"
       >
         <Italic className="h-4 w-4" />
       </button>
       <button
         type="button"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-200' : ''}`}
-      >
-        <Heading1 className="h-4 w-4" />
-      </button>
-      <button
-        type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}`}
+        title="Heading 2"
       >
         <Heading2 className="h-4 w-4" />
       </button>
@@ -78,6 +74,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         type="button"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`}
+        title="Bullet List"
       >
         <List className="h-4 w-4" />
       </button>
@@ -93,6 +90,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         type="button"
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('blockquote') ? 'bg-gray-200' : ''}`}
+        title="Quote"
       >
         <Quote className="h-4 w-4" />
       </button>
@@ -100,6 +98,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         type="button"
         onClick={addLink}
         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('link') ? 'bg-gray-200' : ''}`}
+        title="Add Link"
       >
         <LinkIcon className="h-4 w-4" />
       </button>
@@ -107,6 +106,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         type="button"
         onClick={addImage}
         className="p-2 rounded hover:bg-gray-100"
+        title="Add Image"
       >
         <ImageIcon className="h-4 w-4" />
       </button>
@@ -114,7 +114,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   );
 };
 
-export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export default function ExplanationEditor({ value, onChange, placeholder }: ExplanationEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -127,9 +127,12 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       }),
       Image.configure({
         allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-lg my-4 max-w-full h-auto',
+        },
       }),
       Placeholder.configure({
-        placeholder: placeholder || 'Write something amazing...',
+        placeholder: placeholder || 'Write your explanation here...',
       }),
     ],
     content: value,
@@ -141,14 +144,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         class: 'prose prose-gray max-w-none dark:prose-invert p-4 min-h-[200px] focus:outline-none',
       },
     },
-    enableInputRules: [
-      'bold',
-      'italic',
-      'bulletList',
-      'orderedList',
-      'blockquote',
-      'heading',
-    ],
     autofocus: false,
     immediatelyRender: false,
   });

@@ -34,11 +34,12 @@ const BlogSchema = new Schema<IBlog>({
   content: {
     type: String,
     required: true,
+    maxlength: 50000, // Added max length for content (about 10,000 words)
   },
   excerpt: {
     type: String,
     required: true,
-    maxlength: 200,
+    maxlength: 200000, // Increased from 200 to 500 characters
   },
   featuredImage: {
     type: String,

@@ -1,9 +1,9 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
-import { Blog } from '@/models';
+import { Blog, Comment } from '@/models';
 import { formatDate } from '@/utils';
-import { Eye, Clock, User as UserIcon, Plus, Calendar, Tag } from 'lucide-react';
+import { MessageCircle, Clock, User as UserIcon, Plus, Calendar, Tag, Eye } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -40,6 +40,10 @@ export default async function DashboardPage() {
     .sort({ createdAt: -1 })
     .lean();
 
+  // Count published and draft posts
+  const publishedCount = (blogs as BlogDoc[]).filter(blog => blog.status === 'published').length;
+  const draftCount = (blogs as BlogDoc[]).filter(blog => blog.status === 'draft').length;
+
   // Safely serialize blog data
   const safeBlogs = (blogs as BlogDoc[]).map(blog => {
     // Convert _id to string properly
@@ -68,8 +72,9 @@ export default async function DashboardPage() {
     };
   });
 
-  const publishedCount = safeBlogs.filter(blog => blog.status === 'published').length;
-  // const draftCount = safeBlogs.filter(blog => blog.status === 'draft').length;
+  // Get total comments count
+  await connectDB();
+  const totalComments = await Comment.countDocuments({});
   const totalViews = safeBlogs.reduce((sum, blog) => sum + blog.views, 0);
 
   return (
@@ -107,11 +112,11 @@ export default async function DashboardPage() {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Published</p>
-              <p className="text-2xl font-bold">{publishedCount}</p>
+              <p className="text-sm text-muted-foreground">Total Comments</p>
+              <p className="text-2xl font-bold">{totalComments}</p>
             </div>
-            <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
-              <Eye className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+              <MessageCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
@@ -123,7 +128,7 @@ export default async function DashboardPage() {
               <p className="text-2xl font-bold">{totalViews}</p>
             </div>
             <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
-              <UserIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <Eye className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
@@ -136,7 +141,7 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{publishedCount} published</span>
             <span>•</span>
-{/*             <span>{draftCount} drafts</span> */}
+            <span>{draftCount} drafts</span>
           </div>
         </div>
 

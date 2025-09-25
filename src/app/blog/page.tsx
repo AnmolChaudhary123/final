@@ -1,6 +1,7 @@
 import { Blog } from '@/models';
 import SearchFilters from '@/components/SearchFilters';
 import BlogCard from '@/components/BlogCard';
+import Link from 'next/link';
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -197,10 +198,31 @@ export default async function BlogPage({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">No posts found</h3>
-            <p className="text-muted-foreground">
-              Try adjusting your search criteria or browse all posts.
+            <h3 className="text-lg font-semibold mb-2">
+              {search 
+                ? `No posts found for "${search}"`
+                : category
+                ? `No posts found in category "${category}"`
+                : 'No posts found'
+              }
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              {search || category 
+                ? 'Try different keywords or check out our latest posts below.'
+                : 'Check back later for new content!'
+              }
             </p>
+            {(search || category) && (
+              <Link 
+                href="/blog" 
+                className="inline-flex items-center text-primary hover:underline"
+              >
+                <svg className="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to all posts
+              </Link>
+            )}
           </div>
         )}
 

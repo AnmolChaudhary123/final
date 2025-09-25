@@ -1,13 +1,18 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
-import { Blog } from '@/models';
-import { formatDate } from '@/utils';
-import { Eye, Clock, User as UserIcon, Calendar, Tag } from 'lucide-react';
-import BlogComments from '@/components/BlogComments';
 import RelatedPosts from '@/components/RelatedPosts';
-import ShareButton from '@/components/ShareButton';
 import BlogImage from '@/components/BlogImage';
+import { Blog, Comment, User } from '@/models';
+import { formatDate } from '@/utils';
+import { Eye, Clock, User as UserIcon, Calendar, Tag, MessageSquare, Heart, Bookmark, Share2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import ShareButton from '@/components/ShareButton';
+import BlogComments from '@/components/BlogComments';
+
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -76,6 +81,24 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     .limit(3)
     .lean(); // Use lean() to get plain objects
 
+  // Get the current user's session
+  const session = await getServerSession(authOptions);
+  const currentUserId = session?.user?.id;
+
+  // Get comments count
+  const commentsCount = await Comment.countDocuments({ blog: blog._id });
+
+  // Get like status for the current user
+  const isLiked = currentUserId ? blog.likes.includes(currentUserId) : false;
+  const likeCount = blog.likes?.length || 0;
+
+  // Check if the post is saved by the current user
+  let isSaved = false;
+  if (currentUserId) {
+    const user = await User.findById(currentUserId).select('savedPosts');
+    isSaved = user?.savedPosts?.includes(blog._id) || false;
+  }
+
   // Safely serialize blog data to avoid circular references
   const safeBlog = {
     _id: blog._id.toString(),
@@ -90,9 +113,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     readTime: blog.readTime,
     publishedAt: blog.publishedAt,
     createdAt: blog.createdAt,
+    likes: blog.likes?.map((id: any) => id.toString()) || [],
     author: blog.author ? {
-      name: blog.author.name
-    } : null
+      _id: blog.author._id.toString(),
+      name: blog.author.name,
+      image: blog.author.image
+    } : null,
+    _count: {
+      comments: commentsCount,
+      likes: likeCount,
+    },
+    isLiked,
+    isSaved,
   };
 
   // Safely serialize related posts
@@ -125,10 +157,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           {safeBlog.title}
         </h1>
+          {/* Content */}
+      <div className="prose prose-gray max-w-none dark:prose-invert mb-12">
+        <div dangerouslySetInnerHTML={{ __html: safeBlog.content }} />
+      </div>
 
-        <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
-          {safeBlog.excerpt}
-        </p>
+
+      
 
         {/* Featured Image */}
         <div className="mb-8">
@@ -181,12 +216,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <ShareButton title={safeBlog.title} excerpt={safeBlog.excerpt} />
         </div>
       </header>
+      <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">
+          {safeBlog.excerpt}
+        </p>
 
-      {/* Content */}
-      <div className="prose prose-gray max-w-none dark:prose-invert mb-12">
-        <div dangerouslySetInnerHTML={{ __html: safeBlog.content }} />
-      </div>
-
+    
       {/* Comments */}
       <BlogComments blogId={safeBlog._id} />
 

@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, Globe } from 'lucide-react';
 import Link from 'next/link';
 import RichTextEditor from '@/components/RichTextEditor';
 import ImageUpload from '@/components/ImageUpload';
+import ExplanationEditor from '@/components/ExplanationEditor';
 
 interface BlogFormData {
   title: string;
@@ -24,6 +25,17 @@ export default function CreateBlogPage() {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [categories, setCategories] = useState([
+    'Technology',
+    'Travel',
+    'Food',
+    'Lifestyle',
+    'Health & Wellness',
+    'Business',
+    'Education',
+    'Entertainment',
+  ]);
   const [formData, setFormData] = useState<BlogFormData>({
     title: '',
     content: '',
@@ -67,16 +79,33 @@ export default function CreateBlogPage() {
         }),
       });
 
+      const contentType = response.headers.get('content-type');
+      
       if (response.ok) {
-        const data = await response.json();
-        if (formData.status === 'published') {
-          router.push(`/blog/${data.slug}`);
-        } else {
+        try {
+          // Only try to parse JSON if there's content
+          const data = contentType?.includes('application/json') ? await response.json() : {};
+          if (formData.status === 'published') {
+            router.push(`/blog/${data.slug || ''}`);
+          } else {
+            router.push('/dashboard');
+          }
+        } catch (jsonError) {
+          console.error('Error parsing JSON response:', jsonError);
+          // If JSON parsing fails but the response was OK, still proceed with navigation
           router.push('/dashboard');
         }
       } else {
-        const error = await response.json();
-        alert(error.message || 'Something went wrong');
+        let errorMessage = 'Something went wrong';
+        try {
+          const errorData = contentType?.includes('application/json') 
+            ? await response.json() 
+            : { message: await response.text() };
+          errorMessage = errorData.message || errorMessage;
+        } catch (error) {
+          console.error('Error parsing error response:', error);
+        }
+        alert(errorMessage);
       }
     } catch (error) {
       console.error('Error creating blog:', error);
@@ -152,38 +181,81 @@ export default function CreateBlogPage() {
         {/* Excerpt */}
         <div>
           <label className="block text-sm font-medium mb-2">
-            Excerpt *
+            Explain
           </label>
-          <textarea
+          <ExplanationEditor
             value={formData.excerpt}
-            onChange={(e) => handleChange('excerpt', e.target.value)}
-            className="input w-full h-24"
+            onChange={(value) => handleChange('excerpt', value)}
             placeholder="Write a brief excerpt of your blog post..."
-            required
-          />
+             />
         </div>
 
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Category *
-          </label>
-          <select
-            value={formData.category}
-            onChange={(e) => handleChange('category', e.target.value)}
-            className="input w-full"
-            required
-          >
-            <option value="">Select a category</option>
-            <option value="Technology">Technology</option>
-            <option value="Travel">Travel</option>
-            <option value="Food">Food</option>
-            <option value="Lifestyle">Lifestyle</option>
-            <option value="Business">Business</option>
-            <option value="Health">Health</option>
-            <option value="Education">Education</option>
-            <option value="Entertainment">Entertainment</option>
-          </select>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              <label className="block text-sm font-medium">
+                Category *
+              </label>
+            </div>
+            {!showCustomCategory && (
+              <button
+                type="button"
+                onClick={() => setShowCustomCategory(true)}
+                className="text-xs text-blue-500 hover:underline"
+              >
+                + Add Custom Category
+              </button>
+            )}
+          </div>
+          
+          {showCustomCategory ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.category}
+                onChange={(e) => handleChange('category', e.target.value)}
+                className="input flex-1"
+                placeholder="Enter your custom category"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (formData.category.trim() && !categories.includes(formData.category)) {
+                    setCategories([...categories, formData.category]);
+                  }
+                  setShowCustomCategory(false);
+                }}
+                className="btn btn-outline"
+              >
+                Save
+              </button>
+            </div>
+          ) : (
+            <select
+              value={formData.category}
+              onChange={(e) => {
+                if (e.target.value === 'custom') {
+                  setShowCustomCategory(true);
+                  handleChange('category', '');
+                } else {
+                  handleChange('category', e.target.value);
+                }
+              }}
+              className="input w-full"
+              required
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+              <option value="custom">+ Add New Category</option>
+            </select>
+          )}
         </div>
 
         {/* Tags */}
@@ -202,9 +274,12 @@ export default function CreateBlogPage() {
 
         {/* Featured Image URL */}
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Featured Image
-          </label>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="block text-sm font-medium">
+              Featured Image
+            </label>
+            <span className="text-xs text-muted-foreground">(Optional)</span>
+          </div>
           <ImageUpload
             value={formData.featuredImage}
             onChange={(url) => handleChange('featuredImage', url)}

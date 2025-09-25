@@ -1,24 +1,38 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import { Comment, Blog } from '@/models';
+import mongoose from 'mongoose';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ blogId: string }> }
+  { params }: { params: { blogId: string } }
 ) {
   try {
+    const { blogId } = params;
+    
+    if (!mongoose.Types.ObjectId.isValid(blogId)) {
+      return NextResponse.json(
+        { message: 'Invalid blog ID' },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
 
-    const resolvedParams = await params;
-    const comments = await Comment.find({ blog: resolvedParams.blogId })
-      .populate('author', 'name image')
-      .sort({ createdAt: -1 });
+    const comments = await Comment.find({ blog: blogId })
+      .populate({
+        path: 'author',
+        select: 'name image',
+        model: 'User'
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json(comments);
   } catch (error) {
-    console.error('Error fetching comments:', error);
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }
@@ -28,8 +42,9 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ blogId: string }> }
+  { params }: { params: { blogId: string } }
 ) {
+  const { blogId } = params;
   try {
     const session = await getServerSession(authOptions) as { user: { id: string } } | null;
     if (!session) {
@@ -50,10 +65,8 @@ export async function POST(
 
     await connectDB();
 
-    const resolvedParams = await params;
-
     // Verify blog exists
-    const blog = await Blog.findById(resolvedParams.blogId);
+    const blog = await Blog.findById(blogId);
     if (!blog) {
       return NextResponse.json(
         { message: 'Blog not found' },
@@ -65,7 +78,7 @@ export async function POST(
     const comment = new Comment({
       content: content.trim(),
       author: session.user.id,
-      blog: resolvedParams.blogId,
+      blog: blogId,
       parentComment: parentComment || null,
     });
 

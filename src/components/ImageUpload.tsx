@@ -98,7 +98,8 @@ export default function ImageUpload({
         fileInputRef.current?.click();
     };
 
-    const handleRemove = () => {
+    const handleRemove = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent triggering the parent click handler
         onChange('');
         setError(null);
     };
@@ -113,7 +114,7 @@ export default function ImageUpload({
                 className="hidden"
             />
 
-            {value ? (
+            {value && value.startsWith('http') ? (
                 <div className="relative group">
                     <div className="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
                         <Image
@@ -126,16 +127,26 @@ export default function ImageUpload({
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
                             <button
                                 onClick={handleRemove}
-                                className="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all duration-200"
+                                className="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-all duration-200 absolute top-2 right-2"
                                 type="button"
+                                aria-label="Remove image"
                             >
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                        Click to change image
-                    </p>
+                    <div className="mt-2 text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Click to change image
+                        </p>
+                        <button
+                            onClick={handleRemove}
+                            className="mt-1 text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                            type="button"
+                        >
+                            Remove image
+                        </button>
+                    </div>
                 </div>
             ) : (
                 <div
