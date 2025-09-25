@@ -25,7 +25,7 @@ interface ExplanationEditorProps {
 }
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
-    
+
   if (!editor) {
     return null;
   }
